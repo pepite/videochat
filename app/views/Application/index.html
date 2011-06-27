@@ -1,0 +1,110 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+#{set 'moreScripts'}
+	<script src="@{'/public/javascripts/jquery.webcam/jquery.webcam.js'}" type="text/javascript" charset="utf-8"></script>
+#{/set}
+
+
+<div id="webcam">
+</div>
+
+
+<script>
+
+jQuery(document).ready(function($) {
+
+var socket = new WebSocket("@@{Application.WebChat.join(user)}");
+
+var pos = {};
+var ctx = {};
+var cam = null;
+var image = {};
+socket.onopen = function () {
+	console.log("socket open ");
+}
+socket.onerror= function (error) {
+	console.log("error " + error);
+}
+socket.onmessage = function(event) {
+		var d = event.data.split(":");
+		var user = d[0];
+		// console.log("received event from " + user);
+		// Create the canvas if it does not exists
+		var canvas = document.getElementById(user);
+		if (!canvas) {
+			//canvas = $("<canvas id='" + user + "' />");
+			canvas = document.createElement('canvas');
+			canvas.id = user;
+			canvas.height="240";
+			canvas.width="320"; 
+			pos[user] = 0;
+			$("body p").append(canvas);
+			if (canvas.getContext) {
+				console.log("create new canvas for " + user);
+				ctx[user] = canvas.getContext("2d");
+				ctx[user].clearRect(0, 0, 320, 240);
+				image[user] = ctx[user].getImageData(0, 0, 320, 240);
+			}
+		}
+		
+		var txt = d[1];
+		// % indicate pos = 0
+		if (txt.substring(0,1) == "%") {
+			pos[user] = 0;
+		}
+
+		var img = image[user];
+		var col = txt.split(";")
+		for (var i = 0; i < 320 ; i++) {
+			var tmp = parseInt(col[i]);
+			img.data[pos[user] + 0] = (tmp >> 16) & 0xff;
+        	img.data[pos[user] + 1] = (tmp >> 8) & 0xff;
+        	img.data[pos[user] + 2] = tmp & 0xff;
+			img.data[pos[user] + 3] = 0xff;
+			pos[user] += 4;
+		}
+		if (pos[user] >= 0x4B000) {
+			ctx[user].putImageData(img, 0, 0);
+			pos[user] = 0;
+		}
+};
+
+var webcam = jQuery("#webcam").webcam({
+
+	width: 320,
+	height: 240,
+	mode: "stream",
+	swffile: "@{'/public/javascripts/jquery.webcam/jscam.swf'}",
+
+	onSave: function(data) {
+		// Stream the image through websocket
+		var line = data.split("+");
+		for (var x = 0; x < 240; x++) {
+			socket.send(line[x]);
+		}
+	},
+    
+  	onLoad: function() { 
+  		//webcam.capture();
+  	}, 
+  	
+  	debug: function(type, message) {
+  		console.log(type + ": " + message);
+  	}
+	
+
+});
+});
+</script>
+<input type="button" value="Start" onclick="javascript:webcam.capture()"/>
+
+<hr/>
+
+<p>
+
+
+</p>
+
+
+
