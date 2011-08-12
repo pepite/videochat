@@ -238,6 +238,6 @@ class JSCam {
 		}
 		//ExternalInterface.call("webcam.onSave",  picture);
 		ExternalInterface.call("webcam.onSave",  row);
-		stream = setInterval(_stream, 10);
+		stream = setInterval(_stream, 200);
 	}
 }

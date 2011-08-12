@@ -2,22 +2,28 @@ package models;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import play.libs.F.ArchivedEventStream;
 import play.libs.F.EventStream;
 
 public class Room {
 
-	final ArchivedEventStream<Message> messages = new ArchivedEventStream<Message>(
-			500);
+	final static Map<String, EventStream<Message>> messages = new HashMap<String, EventStream<Message>>(20);
 	
-	public EventStream<Message> join() {
-		return messages.eventStream();
+	public EventStream<Message> join(String user) {
+		if (messages.get(user) == null) 
+			messages.put(user, new EventStream<Message>());
+		return messages.get(user);
 	}
 	
 	public void says(String user, String text) {
-		messages.publish(new Message(user, text));
+		for (String u : messages.keySet()) {
+			if (!u.equals(user))
+				messages.get(u).publish(new Message(user, text));
+		}
 	}
 
 	public class Message {
