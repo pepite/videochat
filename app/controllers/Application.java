@@ -41,7 +41,7 @@ public class Application extends Controller {
     			}
     			
     			for (Message message : ClassOf(Message.class).match(e._2)) {
-    				outbound.send(message.user + ":" + message.text);
+    				outbound.send(message.user +":" +  message.text);
     			}
     			
     		}

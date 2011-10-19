@@ -30,7 +30,7 @@ socket.onerror= function (error) {
 socket.onmessage = function(event) {
 		var d = event.data.split(":");
 		var user = d[0];
-		// console.log("received event from " + user);
+		//console.log("received event from " + user);
 		// Create the canvas if it does not exists
 		var canvas = document.getElementById(user);
 		if (!canvas) {
@@ -90,13 +90,12 @@ var webcam = jQuery("#webcam").webcam({
 	},
     
   	onLoad: function() { 
-  		//webcam.capture();
+  	    this.capture();
   	}, 
   	
   	debug: function(type, message) {
   		console.log(type + ": " + message);
-  		if (message == "Camera started")
-  			this.capture()
+
   	}
 	
 

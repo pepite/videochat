@@ -11,6 +11,7 @@ import play.libs.F.EventStream;
 
 public class Room {
 
+	// One event stream per userm
 	final static Map<String, EventStream<Message>> messages = new HashMap<String, EventStream<Message>>(20);
 	
 	public EventStream<Message> join(String user) {
@@ -46,3 +47,4 @@ public class Room {
 		return instance;
 	}
 }
+	
